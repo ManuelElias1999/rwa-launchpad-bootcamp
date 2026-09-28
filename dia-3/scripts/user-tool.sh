@@ -3,7 +3,7 @@
 set -euo pipefail
 
 NETWORK="${NETWORK:-testnet}"
-USER_KEY="${USER_KEY:?Set USER_KEY to the investor's funded Stellar CLI identity}"
+USER_KEY="${USER_KEY:?Set USER_KEY to a funded investor identity}"
 CONTRACT_ID="${CONTRACT_ID:?Set CONTRACT_ID to the launchpad contract}"
 INVESTOR="$(stellar keys address "$USER_KEY")"
 
