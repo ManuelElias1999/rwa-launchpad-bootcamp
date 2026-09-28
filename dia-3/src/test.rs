@@ -61,7 +61,12 @@ fn test_minimum_investment() {
     env.mock_all_auths();
     client.set_whitelist(&admin, &investor, &true);
 
-    assert_eq!(client.try_invest(&investor, &100), Err(Ok(Error::AmountTooLow)));
+    assert_eq!(
+        client.try_invest(&investor, &100),
+        Err(Ok(soroban_sdk::Error::from_contract_error(
+            Error::AmountTooLow as u32
+        )))
+    );
     assert_eq!(client.balance(&investor), 0);
     assert_eq!(token.balance(&investor), 1_000);
     assert_eq!(token.balance(&contract_id), 0);
