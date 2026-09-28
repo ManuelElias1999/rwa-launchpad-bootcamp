@@ -76,9 +76,15 @@ impl RwaLaunchpad {
             .unwrap_or(false)
     }
 
-    // Paste your team's Day 2 variación logic here. Default: no extra gate.
-    fn check_variation_gate(env: &Env, investor: &Address) -> Result<(), Error> {
-        let _ = (env, investor);
+    // Minimum investment: 500 units of the payment token.
+    fn check_variation_gate(
+        _env: &Env,
+        _investor: &Address,
+        payment_amount: i128,
+    ) -> Result<(), Error> {
+        if payment_amount < 500 {
+            return Err(Error::AmountTooLow);
+        }
         Ok(())
     }
 
@@ -171,19 +177,16 @@ impl RwaLaunchpad {
     pub fn invest(env: Env, investor: Address, payment_amount: i128) -> i128 {
         Self::require_initialized(&env);
         investor.require_auth();
-        if let Err(err) = Self::check_variation_gate(&env, &investor) {
-            panic_with_error!(&env, err);
-        }
         Self::require_not_paused(&env);
 
         if payment_amount <= 0 {
             panic_with_error!(&env, Error::InvalidAmount);
         }
-        if payment_amount < 500 {
-            panic_with_error!(&env, Error::AmountTooLow);
-        }
         if !Self::is_whitelisted(&env, &investor) {
             panic_with_error!(&env, Error::NotWhitelisted);
+        }
+        if let Err(err) = Self::check_variation_gate(&env, &investor, payment_amount) {
+            panic_with_error!(&env, err);
         }
 
         let asset: AssetInfo = env
