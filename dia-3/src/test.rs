@@ -49,6 +49,30 @@ fn test_invest() {
 }
 
 #[test]
+fn test_minimum_investment() {
+    let env = Env::default();
+    let (admin, payment_token, contract_id, client) = setup_with_payment_token(&env);
+    let investor = Address::generate(&env);
+
+    let token_admin = StellarAssetClient::new(&env, &payment_token);
+    let token = TokenClient::new(&env, &payment_token);
+    token_admin.mint(&investor, &1_000);
+
+    env.mock_all_auths();
+    client.set_whitelist(&admin, &investor, &true);
+
+    assert_eq!(client.try_invest(&investor, &100), Err(Ok(Error::AmountTooLow)));
+    assert_eq!(client.balance(&investor), 0);
+    assert_eq!(token.balance(&investor), 1_000);
+    assert_eq!(token.balance(&contract_id), 0);
+
+    assert_eq!(client.invest(&investor, &500), 5);
+    assert_eq!(client.balance(&investor), 5);
+    assert_eq!(token.balance(&investor), 500);
+    assert_eq!(token.balance(&contract_id), 500);
+}
+
+#[test]
 fn test_withdraw() {
     let env = Env::default();
     let (admin, payment_token, _contract_id, client) = setup_with_payment_token(&env);

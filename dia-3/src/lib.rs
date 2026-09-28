@@ -32,6 +32,7 @@ pub enum Error {
     InvalidAmount = 4,
     NotWhitelisted = 5,
     Paused = 6,
+    AmountTooLow = 7,
 }
 
 #[contract]
@@ -177,6 +178,9 @@ impl RwaLaunchpad {
 
         if payment_amount <= 0 {
             panic_with_error!(&env, Error::InvalidAmount);
+        }
+        if payment_amount < 500 {
+            panic_with_error!(&env, Error::AmountTooLow);
         }
         if !Self::is_whitelisted(&env, &investor) {
             panic_with_error!(&env, Error::NotWhitelisted);
